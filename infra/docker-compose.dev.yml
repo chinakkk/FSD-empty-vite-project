@@ -1,0 +1,21 @@
+version: "3"
+
+networks:
+  internal_docker_net:
+    external: true
+
+services:
+  application:
+    image: registry.git.the-devs.com/cargo/frontend/cargo-react-frontend:0.0.21
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cargo-react-frontend.rule=Host(`cargo.dev.the-devs.com`)"
+      - "traefik.http.routers.cargo-react-frontend.entrypoints=websecure"
+      - "traefik.http.routers.cargo-react-frontend.tls=true"
+      - "traefik.http.routers.cargo-react-frontend.tls.certresolver=cfdns"
+      - "traefik.http.routers.cargo-react-frontend.service=cargo-react-frontend"
+      - "traefik.http.services.cargo-react-frontend.loadbalancer.server.port=8080"
+    networks:
+      - internal_docker_net
+

@@ -1,0 +1,32 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  REMOTE_SERVER_APP_PATH: /home/cargo-react-frontend
+
+push to docker:
+  stage: build
+  only:
+    - tags
+  except:
+    - branches
+  script:
+    - echo $CI_REGISTRY_USER
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD registry.git.the-devs.com
+    - docker build -t $REGISTRY_HOST_URL/$CI_PROJECT_PATH:$CI_COMMIT_TAG .
+    - docker push $REGISTRY_HOST_URL/$CI_PROJECT_PATH:$CI_COMMIT_TAG
+  tags:
+    - 5.188.119.62-docker
+
+deploy to dev:
+  stage: deploy
+  rules:
+    - changes:
+      - docker-compose.dev.yml
+  script:
+    - docker-compose -f docker-compose.dev.yml up --build -d
+  environment:
+    name: production
+  tags:
+    - 109.248.203.99-shell
